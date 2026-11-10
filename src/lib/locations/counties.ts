@@ -1,0 +1,60 @@
+// Kenya's 47 counties, in official code order (Mombasa is 001, Nairobi is 047)
+export const COUNTIES = [
+  'Mombasa',
+  'Kwale',
+  'Kilifi',
+  'Tana River',
+  'Lamu',
+  'Taita-Taveta',
+  'Garissa',
+  'Wajir',
+  'Mandera',
+  'Marsabit',
+  'Isiolo',
+  'Meru',
+  'Tharaka-Nithi',
+  'Embu',
+  'Kitui',
+  'Machakos',
+  'Makueni',
+  'Nyandarua',
+  'Nyeri',
+  'Kirinyaga',
+  'Murang’a',
+  'Kiambu',
+  'Turkana',
+  'West Pokot',
+  'Samburu',
+  'Trans-Nzoia',
+  'Uasin Gishu',
+  'Elgeyo-Marakwet',
+  'Nandi',
+  'Baringo',
+  'Laikipia',
+  'Nakuru',
+  'Narok',
+  'Kajiado',
+  'Kericho',
+  'Bomet',
+  'Kakamega',
+  'Vihiga',
+  'Bungoma',
+  'Busia',
+  'Siaya',
+  'Kisumu',
+  'Homa Bay',
+  'Migori',
+  'Kisii',
+  'Nyamira',
+  'Nairobi',
+] as const
+
+export type County = (typeof COUNTIES)[number]
+
+// Counties most requests are expected to name, listed first in pickers
+export const POPULAR_COUNTIES: County[] = ['Nairobi', 'Kiambu', 'Kajiado', 'Machakos', 'Mombasa', 'Nakuru', 'Kilifi']
+
+export const countiesForPicker = (): County[] => [
+  ...POPULAR_COUNTIES,
+  ...[...COUNTIES].filter((county) => !POPULAR_COUNTIES.includes(county)).sort((a, b) => a.localeCompare(b)),
+]

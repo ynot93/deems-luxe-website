@@ -1,7 +1,10 @@
 import type { GlobalConfig } from 'payload'
+import { rebuildPages } from '@/lib/revalidate'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
+  // Contact details appear in the footer of every page
+  hooks: { afterChange: [() => rebuildPages()] },
   admin: {
     group: 'Settings',
     description: 'Contact details only appear on the site once they are filled in here.',

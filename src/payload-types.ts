@@ -67,8 +67,11 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
+    'request-leads': RequestLead;
+    'service-leads': ServiceLead;
+    'team-members': TeamMember;
     media: Media;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,8 +79,11 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    'request-leads': RequestLeadsSelect<false> | RequestLeadsSelect<true>;
+    'service-leads': ServiceLeadsSelect<false> | ServiceLeadsSelect<true>;
+    'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -122,6 +128,141 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Requests from the Post a Request form. Call each person to confirm before you start.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "request-leads".
+ */
+export interface RequestLead {
+  id: number;
+  summary?: string | null;
+  criteria: {
+    intent: 'rent' | 'buy';
+    category: 'residential' | 'commercial' | 'land';
+    timeline: 'immediate' | '1_3_months' | '3_6_months' | '6_plus_months';
+    propertyTypes: (
+      'apartment' | 'maisonette' | 'bungalow' | 'townhouse' | 'villa' | 'office' | 'shop' | 'warehouse' | 'plot'
+    )[];
+    locations: {
+      county:
+        | 'Mombasa'
+        | 'Kwale'
+        | 'Kilifi'
+        | 'Tana River'
+        | 'Lamu'
+        | 'Taita-Taveta'
+        | 'Garissa'
+        | 'Wajir'
+        | 'Mandera'
+        | 'Marsabit'
+        | 'Isiolo'
+        | 'Meru'
+        | 'Tharaka-Nithi'
+        | 'Embu'
+        | 'Kitui'
+        | 'Machakos'
+        | 'Makueni'
+        | 'Nyandarua'
+        | 'Nyeri'
+        | 'Kirinyaga'
+        | 'Murang’a'
+        | 'Kiambu'
+        | 'Turkana'
+        | 'West Pokot'
+        | 'Samburu'
+        | 'Trans-Nzoia'
+        | 'Uasin Gishu'
+        | 'Elgeyo-Marakwet'
+        | 'Nandi'
+        | 'Baringo'
+        | 'Laikipia'
+        | 'Nakuru'
+        | 'Narok'
+        | 'Kajiado'
+        | 'Kericho'
+        | 'Bomet'
+        | 'Kakamega'
+        | 'Vihiga'
+        | 'Bungoma'
+        | 'Busia'
+        | 'Siaya'
+        | 'Kisumu'
+        | 'Homa Bay'
+        | 'Migori'
+        | 'Kisii'
+        | 'Nyamira'
+        | 'Nairobi';
+      areas?: string[] | null;
+    };
+    budget?: {
+      min?: {
+        amount?: number | null;
+        currency?: ('KES' | 'USD') | null;
+      };
+      max?: {
+        amount?: number | null;
+        currency?: ('KES' | 'USD') | null;
+      };
+      period?: ('total' | 'monthly') | null;
+    };
+    bedrooms?: {
+      min?: number | null;
+      max?: number | null;
+    };
+    bathrooms?: number | null;
+    paymentMode?: ('cash' | 'mortgage' | 'instalments' | 'off_plan') | null;
+    titleRequirement?: ('any' | 'title_deed' | 'sectional_title') | null;
+    mustHaves?:
+      | (
+          | 'parking'
+          | 'dsq'
+          | 'garden'
+          | 'gated_community'
+          | 'borehole'
+          | 'backup_power'
+          | 'lift'
+          | 'swimming_pool'
+          | 'pet_friendly'
+          | 'furnished'
+        )[]
+      | null;
+    notes?: string | null;
+  };
+  contact: {
+    name: string;
+    /**
+     * Call to confirm before acting.
+     */
+    phone: string;
+    email?: string | null;
+  };
+  whatsapp?: boolean | null;
+  status: 'new' | 'contacted' | 'qualified' | 'closed';
+  source: 'website' | 'whatsapp' | 'phone' | 'walk_in';
+  /**
+   * Agents can take an unassigned lead. Only managers can reassign one.
+   */
+  assignedAgent?: (number | null) | User;
+  consentAt: string;
+  /**
+   * The email to the lead inbox.
+   */
+  emailStatus?: ('pending' | 'sent' | 'failed' | 'gave_up') | null;
+  emailAttempts?: number | null;
+  lastEmailError?: string | null;
+  ipHash?: string | null;
+  /**
+   * Filled in once the CRM is connected.
+   */
+  crmId?: string | null;
+  /**
+   * Only staff see these notes.
+   */
+  staffNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -144,6 +285,88 @@ export interface User {
   updatedAt: string;
   createdAt: string;
   collection: 'users';
+}
+/**
+ * Quote requests from the service pages, and messages from the contact page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-leads".
+ */
+export interface ServiceLead {
+  id: number;
+  title?: string | null;
+  service: 'management' | 'valuation' | 'agency' | 'general';
+  summary?: string | null;
+  details?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  contact: {
+    name: string;
+    /**
+     * Call to confirm before acting.
+     */
+    phone: string;
+    email?: string | null;
+  };
+  status: 'new' | 'quoted' | 'won' | 'lost';
+  /**
+   * Agents can take an unassigned lead. Only managers can reassign one.
+   */
+  assignedAgent?: (number | null) | User;
+  consentAt: string;
+  /**
+   * The email to the lead inbox.
+   */
+  emailStatus?: ('pending' | 'sent' | 'failed' | 'gave_up') | null;
+  emailAttempts?: number | null;
+  lastEmailError?: string | null;
+  ipHash?: string | null;
+  /**
+   * Filled in once the CRM is connected.
+   */
+  crmId?: string | null;
+  /**
+   * Only staff see these notes.
+   */
+  staffNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * The About page shows published team members. It hides the team section while none are published.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members".
+ */
+export interface TeamMember {
+  id: number;
+  name: string;
+  /**
+   * For example Senior agent
+   */
+  role: string;
+  bio?: string | null;
+  photo: number | Media;
+  /**
+   * Only fill this in with a registration number that has been checked.
+   */
+  registration?: {
+    body?: ('EARB' | 'VRB') | null;
+    number?: string | null;
+  };
+  /**
+   * Lower shows first.
+   */
+  order?: number | null;
+  published?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -210,12 +433,24 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'request-leads';
+        value: number | RequestLead;
+      } | null)
+    | ({
+        relationTo: 'service-leads';
+        value: number | ServiceLead;
+      } | null)
+    | ({
+        relationTo: 'team-members';
+        value: number | TeamMember;
       } | null)
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -261,14 +496,118 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "request-leads_select".
  */
-export interface UsersSelect<T extends boolean = true> {
-  email?: T;
+export interface RequestLeadsSelect<T extends boolean = true> {
+  summary?: T;
+  criteria?:
+    | T
+    | {
+        intent?: T;
+        category?: T;
+        timeline?: T;
+        propertyTypes?: T;
+        locations?:
+          | T
+          | {
+              county?: T;
+              areas?: T;
+            };
+        budget?:
+          | T
+          | {
+              min?:
+                | T
+                | {
+                    amount?: T;
+                    currency?: T;
+                  };
+              max?:
+                | T
+                | {
+                    amount?: T;
+                    currency?: T;
+                  };
+              period?: T;
+            };
+        bedrooms?:
+          | T
+          | {
+              min?: T;
+              max?: T;
+            };
+        bathrooms?: T;
+        paymentMode?: T;
+        titleRequirement?: T;
+        mustHaves?: T;
+        notes?: T;
+      };
+  contact?:
+    | T
+    | {
+        name?: T;
+        phone?: T;
+        email?: T;
+      };
+  whatsapp?: T;
+  status?: T;
+  source?: T;
+  assignedAgent?: T;
+  consentAt?: T;
+  emailStatus?: T;
+  emailAttempts?: T;
+  lastEmailError?: T;
+  ipHash?: T;
+  crmId?: T;
+  staffNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-leads_select".
+ */
+export interface ServiceLeadsSelect<T extends boolean = true> {
+  title?: T;
+  service?: T;
+  summary?: T;
+  details?: T;
+  contact?:
+    | T
+    | {
+        name?: T;
+        phone?: T;
+        email?: T;
+      };
+  status?: T;
+  assignedAgent?: T;
+  consentAt?: T;
+  emailStatus?: T;
+  emailAttempts?: T;
+  lastEmailError?: T;
+  ipHash?: T;
+  crmId?: T;
+  staffNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members_select".
+ */
+export interface TeamMembersSelect<T extends boolean = true> {
   name?: T;
-  staffLevel?: T;
-  active?: T;
-  googleSub?: T;
+  role?: T;
+  bio?: T;
+  photo?: T;
+  registration?:
+    | T
+    | {
+        body?: T;
+        number?: T;
+      };
+  order?: T;
+  published?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -313,6 +652,19 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  email?: T;
+  name?: T;
+  staffLevel?: T;
+  active?: T;
+  googleSub?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -11,12 +11,15 @@ export type PublicContact = {
 }
 
 // Runs without a user, so access control strips staff-only fields such as the lead inbox.
-export const getPublicContact = cache(async (): Promise<PublicContact> => {
+const getPublicSettings = cache(async () => {
   const payload = await getPayload({ config })
-  const { phone, whatsapp, email, officeAddress, officeHours } = await payload.findGlobal({
-    slug: 'site-settings',
-    depth: 0,
-    overrideAccess: false,
-  })
+  return payload.findGlobal({ slug: 'site-settings', depth: 0, overrideAccess: false })
+})
+
+export const getPublicContact = cache(async (): Promise<PublicContact> => {
+  const { phone, whatsapp, email, officeAddress, officeHours } = await getPublicSettings()
   return { phone, whatsapp, email, officeAddress, officeHours }
 })
+
+// For showing approximate USD and KES equivalents. Null until staff set a rate.
+export const getKesPerUsd = async () => (await getPublicSettings()).kesPerUsd ?? null

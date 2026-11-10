@@ -135,6 +135,19 @@ export const CheckboxField = ({
   )
 }
 
+const segmentClasses =
+  'flex min-h-12 cursor-pointer items-center justify-center rounded-control border border-control bg-white px-3 text-center text-[0.9375rem] font-semibold text-ink transition-colors peer-checked:border-purple peer-checked:bg-purple peer-checked:text-white peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-purple'
+
+type GroupInputProps = Omit<ComponentProps<'input'>, 'type' | 'value' | 'defaultChecked'>
+
+const GroupError = ({ id, error }: { id: string; error?: string }) =>
+  error ? (
+    <p id={`${id}-error`} className="text-sm font-medium text-danger">
+      {error}
+    </p>
+  ) : null
+
+// One choice from a few, shown as segments in a row
 export const ChoiceGroup = ({
   legend,
   name,
@@ -145,30 +158,75 @@ export const ChoiceGroup = ({
 }: {
   legend: string
   name: string
-  options: { label: string; value: string }[]
+  options: readonly { label: string; value: string }[]
   error?: string
   defaultValue?: string
-  inputProps?: Omit<ComponentProps<'input'>, 'type' | 'value' | 'name' | 'defaultChecked'>
-}) => (
-  <fieldset className="grid gap-1.5">
-    <legend className="mb-1.5 text-sm font-semibold text-ink">{legend}</legend>
-    <div className="grid auto-cols-fr grid-flow-col gap-2">
-      {options.map((option) => (
-        <label key={option.value} className="relative">
-          <input
-            type="radio"
-            name={name}
-            value={option.value}
-            defaultChecked={option.value === defaultValue}
-            className="peer absolute inset-0 opacity-0"
-            {...inputProps}
-          />
-          <span className="flex min-h-12 cursor-pointer items-center justify-center rounded-control border border-control bg-white px-3 text-[0.9375rem] font-semibold text-ink transition-colors peer-checked:border-purple peer-checked:bg-purple peer-checked:text-white peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-purple">
-            {option.label}
-          </span>
-        </label>
-      ))}
-    </div>
-    {error ? <p className="text-sm font-medium text-danger">{error}</p> : null}
-  </fieldset>
-)
+  inputProps?: GroupInputProps
+}) => {
+  const id = useId()
+  return (
+    <fieldset className="grid gap-1.5" aria-describedby={error ? `${id}-error` : undefined}>
+      <legend className="mb-1.5 text-sm font-semibold text-ink">{legend}</legend>
+      <div className="grid auto-cols-fr grid-flow-col gap-2">
+        {options.map((option) => (
+          <label key={option.value} className="relative">
+            <input
+              type="radio"
+              name={name}
+              value={option.value}
+              defaultChecked={defaultValue === undefined ? undefined : option.value === defaultValue}
+              className="peer absolute inset-0 opacity-0"
+              {...inputProps}
+            />
+            <span className={segmentClasses}>{option.label}</span>
+          </label>
+        ))}
+      </div>
+      <GroupError id={id} error={error} />
+    </fieldset>
+  )
+}
+
+// Any number of choices, shown as chips that wrap
+export const CheckboxGroup = ({
+  legend,
+  hint,
+  options,
+  error,
+  optional,
+  inputProps,
+}: {
+  legend: string
+  hint?: string
+  options: readonly { label: string; value: string }[]
+  error?: string
+  optional?: boolean
+  inputProps?: GroupInputProps
+}) => {
+  const id = useId()
+  return (
+    <fieldset
+      className="grid gap-1.5"
+      aria-describedby={[hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined}
+    >
+      <legend className="mb-1.5 text-sm font-semibold text-ink">
+        {legend}
+        {optional ? <span className="font-normal text-mute"> (optional)</span> : null}
+      </legend>
+      {hint ? (
+        <p id={`${id}-hint`} className="-mt-1 mb-1 text-sm text-mute">
+          {hint}
+        </p>
+      ) : null}
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => (
+          <label key={option.value} className="relative">
+            <input type="checkbox" value={option.value} className="peer absolute inset-0 opacity-0" {...inputProps} />
+            <span className={`${segmentClasses} min-h-11 px-4`}>{option.label}</span>
+          </label>
+        ))}
+      </div>
+      <GroupError id={id} error={error} />
+    </fieldset>
+  )
+}

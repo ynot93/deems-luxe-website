@@ -1,17 +1,23 @@
-// A stand-in for Google's sign-in, for end-to-end tests only. It runs the real flow:
-// authorization redirect, PKCE-checked code exchange, and an RS256 ID token checked against JWKS.
-// Tests choose who "signs in" with POST /identity.
+// Stand-ins for outside services, for end-to-end tests only.
+//
+// Google sign-in runs the real flow: authorization redirect, PKCE-checked code exchange, and an
+// RS256 ID token checked against JWKS. Tests choose who "signs in" with POST /identity.
+//
+// Email copies Resend's POST /emails. Tests read what was sent with GET /emails, clear it with
+// DELETE /emails, and make sending fail with POST /emails/fail { "fail": true }.
 import { createHash, randomUUID } from 'node:crypto'
 import { createServer } from 'node:http'
 import { SignJWT, exportJWK, generateKeyPair } from 'jose'
 
-const port = Number(process.env.STUB_GOOGLE_PORT ?? 3101)
+const port = Number(process.env.STUB_PORT ?? 3101)
 const issuer = `http://127.0.0.1:${port}`
 const { publicKey, privateKey } = await generateKeyPair('RS256')
 const jwk = { ...(await exportJWK(publicKey)), kid: 'stub', alg: 'RS256', use: 'sig' }
 
 let identity = null
 const codes = new Map()
+let emails = []
+let failEmails = false
 
 const readBody = async (request) => {
   let body = ''
@@ -74,6 +80,23 @@ createServer(async (request, response) => {
       .setExpirationTime('5m')
       .sign(privateKey)
     return sendJson(response, 200, { id_token: idToken })
+  }
+
+  if (url.pathname === '/emails/fail') {
+    failEmails = JSON.parse(await readBody(request)).fail
+    return sendJson(response, 200, { ok: true })
+  }
+
+  if (url.pathname === '/emails') {
+    if (request.method === 'GET') return sendJson(response, 200, emails)
+    if (request.method === 'DELETE') {
+      emails = []
+      return sendJson(response, 200, { ok: true })
+    }
+    if (request.headers.authorization !== 'Bearer e2e-resend-key') return sendJson(response, 401, {})
+    if (failEmails) return sendJson(response, 500, { message: 'stub failure' })
+    emails.push(JSON.parse(await readBody(request)))
+    return sendJson(response, 200, { id: randomUUID() })
   }
 
   sendJson(response, 404, { error: 'not_found' })

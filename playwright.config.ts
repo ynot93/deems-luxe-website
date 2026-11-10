@@ -1,7 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const baseURL = 'http://localhost:3100'
-// Deliberately a different host from the app, so Google's redirect back counts as cross-site
+// Stands in for Google and the email service. Deliberately a different host from the app,
+// so Google's redirect back counts as cross-site.
 const stubUrl = 'http://127.0.0.1:3101'
 
 export default defineConfig({
@@ -14,7 +15,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      command: 'node e2e/support/stub-google.mjs',
+      command: 'node e2e/support/stub-services.mjs',
       url: `${stubUrl}/health`,
       reuseExistingServer: false,
     },
@@ -32,6 +33,11 @@ export default defineConfig({
         GOOGLE_CLIENT_SECRET: 'e2e-secret',
         GOOGLE_OIDC_STUB_URL: stubUrl,
         BOOTSTRAP_ADMIN_EMAILS: 'first.admin@example.com',
+        RESEND_API_URL: stubUrl,
+        RESEND_API_KEY: 'e2e-resend-key',
+        LEAD_FROM_EMAIL: 'Deems Luxe Homes <requests@example.com>',
+        CRON_SECRET: 'e2e-cron-secret',
+        LEAD_RETRY_SETTLE_SECONDS: '0',
       },
     },
   ],

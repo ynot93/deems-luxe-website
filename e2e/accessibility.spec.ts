@@ -1,7 +1,17 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 
-const routes = ['/', '/styleguide','/a-page-that-does-not-exist', '/admin/login']
+const routes = [
+  '/',
+  '/post-a-request',
+  '/services',
+  '/services/property-valuation',
+  '/contact',
+  '/about',
+  '/styleguide',
+  '/a-page-that-does-not-exist',
+  '/admin/login',
+]
 const viewports = [
   { label: 'desktop', width: 1440, height: 900 },
   { label: 'mobile', width: 375, height: 812 },

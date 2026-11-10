@@ -18,7 +18,7 @@ The repo lives in WSL. Run every Node command inside WSL, never on the Windows `
 | `pnpm dev` | Runs the site on http://localhost:3000 |
 | `pnpm shot <route>` | Saves 1440px and 375px screenshots to `screenshots/`, and reports overflow and console errors |
 | `pnpm test` | Unit tests |
-| `pnpm test:e2e` | End-to-end tests, on port 3100 with a reset `deems_luxe_test` database and a stub Google |
+| `pnpm test:e2e` | End-to-end tests, on port 3100 with a reset `deems_luxe_test` database, and stand-ins for Google and the email service (`e2e/support/stub-services.mjs`) |
 | `pnpm generate:types` | Regenerates `src/payload-types.ts` after changing a collection or global |
 | `pnpm generate:importmap` | Regenerates the admin import map after adding an admin component |
 
@@ -30,7 +30,10 @@ The repo lives in WSL. Run every Node command inside WSL, never on the Windows `
 - `src/collections/`, `src/globals/` Payload content types
 - `src/components/ui/` shared components, previewed at `/styleguide` (not available in production)
 - `src/components/layout/`, `src/components/brand/` site chrome and logo
-- `src/lib/` logic with no UI
+- `src/components/forms/` lead forms, which call the server actions in `post-a-request/actions.ts` and `services/actions.ts`
+- `src/content/` draft page copy that moves into the CMS once the owner signs it off
+- `src/lib/` logic with no UI. `schemas/request-criteria.ts` is the request shape shared with Phase 2, so change it with care
+- `src/lib/leads/` saving leads, the per-sender limit, and the lead emails retried by `/api/cron/lead-emails`
 
 ## UI rules
 
@@ -48,7 +51,8 @@ After any UI change, run `pnpm shot <route>`, open both screenshots, list every 
 Every section launches with real content or doesn't launch.
 
 - Sections with no content don't render. Featured Properties also leaves the navigation while empty.
-- Unreviewed drafts show locally with `DraftRibbon`, and never in production.
+- Unreviewed drafts show locally with `DraftRibbon`, and never in production. Each page has a `reviewed` flag, checked against `showDrafts` from `src/lib/drafts.ts`.
+- Leads are only written by the server. A lead is saved before its email is sent, so an email failure never loses it.
 - Never invent staff names, registration numbers, testimonials, partner logos, statistics or properties.
 - Don't claim EARB or VRB registration until the owner confirms it.
 - Stock photos are for general scenes only, never presented as team members or listed properties.

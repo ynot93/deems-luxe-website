@@ -4,7 +4,10 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
+import { RequestLeads } from './collections/leads/RequestLeads'
+import { ServiceLeads } from './collections/leads/ServiceLeads'
 import { Media } from './collections/Media'
+import { TeamMembers } from './collections/TeamMembers'
 import { Users } from './collections/Users'
 import { SiteSettings } from './globals/SiteSettings'
 
@@ -29,7 +32,7 @@ export default buildConfig({
       },
     },
   },
-  collections: [Users, Media],
+  collections: [RequestLeads, ServiceLeads, TeamMembers, Media, Users],
   globals: [SiteSettings],
   editor: lexicalEditor(),
   db: postgresAdapter({

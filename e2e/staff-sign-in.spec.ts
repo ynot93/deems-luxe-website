@@ -1,22 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
 import { SignJWT } from 'jose'
+import { admin, currentUser, expectSignedIn, signInWithGoogle, stubUrl } from './support/helpers'
 
-const stubUrl = 'http://127.0.0.1:3101'
-
-const admin = { sub: 'google-admin', email: 'first.admin@example.com', emailVerified: true, name: 'First Admin' }
 const agent = { sub: 'google-agent', email: 'agent@example.com', emailVerified: true, name: 'Agent One' }
-
-const signInWithGoogle = async (page: Page, identity: object) => {
-  await page.request.post(`${stubUrl}/identity`, { data: identity })
-  await page.goto('/admin/login')
-  await page.getByRole('link', { name: 'Sign in with Google' }).click()
-}
-
-const expectSignedIn = (page: Page) => expect(page).toHaveURL(/\/admin\/?$/)
-
-// Asks from inside the page, because the session cookie is refused without browser headers
-const currentUser = (page: Page) =>
-  page.evaluate(async () => (await (await fetch('/api/users/me')).json()).user)
 
 const expectRefused = async (page: Page, reason: string, message: RegExp) => {
   await expect(page).toHaveURL(new RegExp(`/admin/login\\?error=${reason}`))
