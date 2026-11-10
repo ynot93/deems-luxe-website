@@ -24,6 +24,22 @@ for (const { label, width, height } of viewports) {
   })
 
   const response = await page.goto(new URL(route, base).href, { waitUntil: 'networkidle' })
+  // Scroll the page through so lazy images load before the full-page capture
+  await page.evaluate(async (step) => {
+    for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+      window.scrollTo(0, y)
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+    window.scrollTo(0, 0)
+  }, height)
+  await page.waitForLoadState('networkidle')
+  await page.evaluate(() =>
+    Promise.all(
+      [...document.images].map((image) =>
+        image.complete ? null : new Promise((resolve) => (image.onload = image.onerror = resolve)),
+      ),
+    ),
+  )
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   )

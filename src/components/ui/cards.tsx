@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { RoofPhoto } from './RoofPhoto'
 
 type Photo = NonNullable<ComponentProps<typeof RoofPhoto>['photo']>
@@ -22,6 +22,14 @@ export const Badge = ({
 
 // Illustrates the product in hero and feature images. Always badged "Example", because
 // Phase 1 has no live requests and this must not read as real data.
+export const ExampleCard = ({ title, children }: { title: string; children: ReactNode }) => (
+  <div className="rounded-card bg-white p-5 shadow-float">
+    <Badge>Example</Badge>
+    <p className="text-h3 mt-3 text-ink">{title}</p>
+    <div className="mt-3 text-sm">{children}</div>
+  </div>
+)
+
 export const ExampleRequestCard = ({
   title,
   location,
@@ -33,10 +41,8 @@ export const ExampleRequestCard = ({
   budget: string
   timing: string
 }) => (
-  <div className="rounded-card bg-white p-5 shadow-float">
-    <Badge>Example</Badge>
-    <p className="text-h3 mt-3 text-ink">{title}</p>
-    <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+  <ExampleCard title={title}>
+    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
       <dt className="text-mute">Where</dt>
       <dd className="font-medium">{location}</dd>
       <dt className="text-mute">Budget</dt>
@@ -44,7 +50,7 @@ export const ExampleRequestCard = ({
       <dt className="text-mute">When</dt>
       <dd className="font-medium">{timing}</dd>
     </dl>
-  </div>
+  </ExampleCard>
 )
 
 export const ServiceCard = ({
@@ -60,8 +66,12 @@ export const ServiceCard = ({
   linkLabel: string
   photo?: Photo
 }) => (
-  <div className="grid grid-cols-[6.5rem_1fr] gap-4 sm:grid-cols-[9rem_1fr] sm:gap-6">
-    <RoofPhoto photo={photo} sizes="144px" className="aspect-[4/5]" />
+  <div className="grid grid-cols-[6.5rem_1fr] gap-4 sm:grid-cols-[9rem_1fr] sm:gap-6 lg:grid-cols-1 lg:gap-5">
+    <RoofPhoto
+      photo={photo}
+      sizes="(min-width: 1024px) 33vw, 144px"
+      className="aspect-[4/5] lg:aspect-[3/2]"
+    />
     <div>
       <h3 className="text-h3">{title}</h3>
       <p className="mt-2 text-[0.9375rem] text-mute">{description}</p>
